@@ -1,14 +1,14 @@
 <?php
-namespace Gaetan\P5\Model;
+namespace Gaetan\P5_2\Model;
 
 class Comment
 {
     /**
     *@var int $_id
     *@var int $_user_id
-    *@var int $_post_id
+    *@var int $_content_id
     *@var string $_user_pseudo
-    *@var string $_title
+    *@var string $_type define either article or post comment
     *@var string $_content
     *@var int $_report If $_report == 1, the comment is reported
     *@var int $_date
@@ -16,9 +16,9 @@ class Comment
 
     private $_id;
     private $_user_id;
-    private $_post_id;
+    private $_content_id;
     private $_user_pseudo;
-    private $_title;
+    private $_type;
     private $_content;
     private $_report;
     private $_date;
@@ -52,9 +52,9 @@ class Comment
         return $this->_user_id;
     }
 
-    public function postId()
+    public function contentId()
     {
-        return $this->_post_id;
+        return $this->_content_id;
     }
 
     public function userPseudo()
@@ -62,9 +62,9 @@ class Comment
         return $this->_user_pseudo;
     }
 
-    public function title()
+    public function type()
     {
-        return $this->_title;
+        return $this->_type;
     }
 
     public function content()
@@ -100,11 +100,11 @@ class Comment
         }
     }
 
-    public function setPostId($postId)
+    public function setContentId($contentId)
     {
-        $postId = (int) $postId;
-        if ($postId > 0) {
-            $this->_post_id = $postId;
+        $contentId = (int) $contentId;
+        if ($contentId > 0) {
+            $this->_content_id = $contentId;
         }
     }
 
@@ -116,11 +116,11 @@ class Comment
         }
     }
 
-    public function setTitle($title)
+    public function setType($type)
     {
-        if(is_string($title))
+        if(is_string($type))
         {
-            $this->_title = $title;
+            $this->_type = $type;
         }
     }
 

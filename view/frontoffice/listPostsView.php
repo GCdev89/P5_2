@@ -1,7 +1,6 @@
 <?php ob_start(); ?>
 <div class="row mt-3 mx-auto px-auto">
-
-<?php foreach ($posts as $aPost): ?>
+<?php foreach ($contents as $aPost): ?>
     <div class="post col-lg-12 my-auto">
         <div class="row d-flex justify-content-between bg-dark text-light rounded-top">
             <p class="m-2 pt-1 pb-0"><span class="h4 text-warning font-italic"><?= htmlspecialchars($aPost->title())?></span> par : <?= htmlspecialchars($aPost->userPseudo())?>, le : <?= htmlspecialchars($aPost->date())?></p>

@@ -8,7 +8,7 @@
         <script>
         tinymce.init({
             language : "fr_FR",
-            selector: '#content'
+            selector: '.content'
         });
         </script>
 
@@ -22,16 +22,27 @@
 
         <div class="container-fluid mb-5">
             <div class="row">
-                <div class="jumbotron mx-auto mt-4 px-auto">
-                    <div class="container">
-                        <h1 class="display-5  font-italic "><a href="index.php" class="text-warning text-decoration-none"><img id="main_logo" class="img-fluid" src="../public/images/logo/x1.png" /></a></h1>
+                <?php if (isset($sidebar)): ?>
+                    <?= $sidebar ?>
+                <?php endif; ?>
+                <main class="col-12 col-md-10 m-0 p-0 mx-lg-auto px-lg-auto">
+                    <?php if (isset($headerHero)): ?>
+                        <?= $headerHero ?>
+                        <?php else: ?>
+                            <div class="jumbotron col-8 col-lg-4 mx-auto mt-4 px-auto">
+                                <div class="container mx-auto px-auto">
+                                    <h1 class="display-5 mx-auto px-auto "><a href="index.php" class="mx-auto px-auto"><img id="main_logo" class="img-fluid" src="../public/images/logo/x1.png" alt="Code bebe parental solutions" /></a></h1>
+                                </div>
+                            </div>
+                    <?php endif; ?>
+
+                    <div class="row col-lg-12 mx-0 px-0 mx-md-auto">
+                        <div class="col-lg-10 mx-0 mx-md-auto mb-2">
+                                <?= $content ?>
+                        </div>
                     </div>
-                </div>
-                <div class="row col-lg-12 mx-0 px-0 mx-md-auto">
-                    <div class="col-lg-8 mx-0 mx-md-auto mb-2">
-                            <?= $content ?>
-                    </div>
-                </div>
+                </main>
+
             </div>
         </div>
         <?php if (isset($_SESSION['role'])): ?>
@@ -41,8 +52,8 @@
         <?php endif; ?>
 
 
-        <?php if (isset($controlScript)) {
-            echo $controlScript;
+        <?php if (isset($myScript)) {
+            echo $myScript;
         } ?>
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>

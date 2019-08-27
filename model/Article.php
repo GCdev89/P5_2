@@ -1,5 +1,5 @@
 <?php
-namespace Gaetan\P5\Model;
+namespace Gaetan\P5_2\Model;
 
 class Article
 {
@@ -11,9 +11,7 @@ class Article
     *@var string $_content
     *@var string $_description
     *@var string $_parent either 'dad', 'mom' or 'both'
-    *@var string $_tag_1
-    *@var string $_tag_2
-    *@var string $_tag_3
+    *@var string $_tag
     *@var string $_meta_title
     *@var string $_meta_desc
     *@var int $_date
@@ -26,9 +24,7 @@ class Article
     private $_content;
     private $_description;
     private $_parent;
-    private $_tag_1;
-    private $_tag_2 ;
-    private $_tag_3;
+    private $_tag;
     private $_meta_title;
     private $_meta_desc;
     private $_date;
@@ -87,19 +83,9 @@ class Article
         return $this->_parent;
     }
 
-    public function tag_1()
+    public function tag()
     {
-        return $this->_tag_1;
-    }
-
-    public function tag_2()
-    {
-        return $this->_tag_2;
-    }
-
-    public function tag_3()
-    {
-        return $this->_tag_3;
+        return $this->_tag;
     }
 
     public function metaTitle()
@@ -175,27 +161,11 @@ class Article
         }
     }
 
-    public function setTag_1($tag_1)
+    public function setTag($tag)
     {
-        if(is_string($tag_1))
+        if(is_string($tag))
         {
-            $this->_tag_1 = $tag_1;
-        }
-    }
-
-    public function setTag_2($tag_2)
-    {
-        if(is_string($tag_2))
-        {
-            $this->_tag_2 = $tag_2;
-        }
-    }
-
-    public function setTag_1($tag_3)
-    {
-        if(is_string($tag_3))
-        {
-            $this->_tag_3 = $tag_3;
+            $this->_tag = $tag;
         }
     }
 

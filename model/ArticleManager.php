@@ -1,5 +1,5 @@
 <?php
-namespace Gaetan\P5\Model;
+namespace Gaetan\P5_2\Model;
 
 require_once('../model/Manager.php');
 require_once('../model/Article.php');
@@ -8,16 +8,14 @@ class ArticleManager extends Manager
 {
     public function add(Article $article)
     {
-        $q = $this->db()->prepare('INSERT INTO article(user_id, title, content, description, parent, tag_1, tag_2, tag_3, meta_title, meta_desc, date) VALUES(:user_id, :title, :content, :parent, :description, :tag_1, :tag_2, :tag_3, :meta_title, :meta_desc, NOW())');
+        $q = $this->db()->prepare('INSERT INTO article(user_id, title, content, description, parent, tag, meta_title, meta_desc, date) VALUES(:user_id, :title, :content, :description, :parent, :tag, :meta_title, :meta_desc, NOW())');
         $affectedLines = $q->execute(array(
             'user_id' => $article->userId(),
             'title' => $article->title(),
             'content' => $article->content(),
             'description' => $article->description(),
             'parent' => $article->parent(),
-            'tag_1' => $article->tag_1(),
-            'tag_2' => $article->tag_2(),
-            'tag_3' => $article->tag_3(),
+            'tag' => $article->tag(),
             'meta_title' => $article->metaTitle(),
             'meta_desc' => $article->metaDesc()
         ));
@@ -26,15 +24,13 @@ class ArticleManager extends Manager
 
     public function update(Article $article)
     {
-        $q = $this->db()->prepare('UPDATE article SET  title = :newtitle, content = :newcontent, description = :newdescription, parent = :newparent, tag_1 = :newtag_1, tag_2 = :newtag_2, tag_3 = :newtag_3, meta_title = :newmeta_title, meta_desc = :newmeta_desc WHERE id = :id');
+        $q = $this->db()->prepare('UPDATE article SET  title = :newtitle, content = :newcontent, description = :newdescription, parent = :newparent, tag = :newtag, meta_title = :newmeta_title, meta_desc = :newmeta_desc WHERE id = :id');
         $affectedLines = $q->execute(array(
             'newtitle' => $article->title(),
             'newcontent' => $article->content(),
             'newdescription' => $article->description(),
             'newparent' => $article->parent(),
-            'newtag_1' => $article->tag_1(),
-            'newtag_2' => $article->tag_2(),
-            'newtag_3' => $article->tag_3(),
+            'newtag' => $article->tag(),
             'newmeta_title' => $article->metaTitle(),
             'newmeta_desc' => $article->metaDesc(),
             'id' => $article->id()
@@ -44,11 +40,11 @@ class ArticleManager extends Manager
 
     public function get($articleId)
     {
-        $q = $this->db()->prepare('SELECT u.pseudo userPseudo, a.id id, a.user_id userId, a.title title, a.content content, a.meta_title metaTitle, a.meta_desc metaDesc, DATE_FORMAT(a.date, \'%d/%m/%Y à %Hh%imin%ss\') AS date
+        $q = $this->db()->prepare('SELECT u.pseudo userPseudo, a.id id, a.user_id userId, a.title title, a.content content, a.description description, a.parent parent, a.tag tag, a.meta_title metaTitle, a.meta_desc metaDesc, DATE_FORMAT(a.date, \'%d/%m/%Y à %Hh%imin%ss\') AS date
         FROM user u
         INNER JOIN article a
-        ON p.user_id = u.id
-        WHERE p.id = :id');
+        ON a.user_id = u.id
+        WHERE a.id = :id');
         $q->execute(array('id' => $articleId));
         $data = $q->fetch();
 
@@ -58,9 +54,9 @@ class ArticleManager extends Manager
         return $article;
     }
 
-    public function getListArticle($start, $articlesByPage, $whereUser)
+    public function getList($start, $articlesByPage, $whereUser, $parent, $tag)
     {
-        $query = 'SELECT u.pseudo userPseudo, a.id id, a.user_id userId, a.title title, a.content content, a.meta_title metaTitle, a.meta_desc metaDesc, DATE_FORMAT(a.date, \'%d/%m/%Y %Hh%imin\') AS date
+        $query = 'SELECT u.pseudo userPseudo, a.id id, a.user_id userId, a.title title, a.content content, a.description description, a.parent parent, a.tag tag, a.meta_title metaTitle, a.meta_desc metaDesc, DATE_FORMAT(a.date, \'%d/%m/%Y\') AS date
         FROM user u
         INNER JOIN article a
             ON a.user_id = u.id
@@ -68,18 +64,44 @@ class ArticleManager extends Manager
         $where = '';
         // Filter by user if $whereUser == true
         if ($whereUser > 0) {
-            $where = 'WHERE p.user_id = :user_id ';
+            $where = 'WHERE a.user_id = :user_id ';
+        }
+        // Filter by parent type
+        if ($parent != NULL && $parent != 'both') {
+            if ($where != '') {
+                $where .= ' AND';
+            }
+            else {
+                $where = 'WHERE';
+            }
+            $where .= ' a.parent = :parent OR a.parent = "both" ';
         }
 
+        // Filter by tag
+        if ($tag != NULL) {
+            if ($where != '') {
+                $where .= ' AND';
+            }
+            else {
+                $where = 'WHERE';
+            }
+            $where .= ' a.tag = :tag ';
+        }
         $query .= $where;
-        $query .= 'ORDER BY p.date DESC
+        $query .= 'ORDER BY a.date DESC
         LIMIT :start, :articles_by_page';
 
         $q = $this->db()->prepare($query);
         $q->bindValue(':start', $start, $this->db()::PARAM_INT);
         $q->bindValue(':articles_by_page', $articlesByPage, $this->db()::PARAM_INT);
         if ($whereUser > 0) {
-            $q->bindValue(':user_id', $whereUser, $this->db()::PARAM_STR);
+            $q->bindValue(':user_id', $whereUser, $this->db()::PARAM_INT);
+        }
+        if ($parent != NULL && $parent != 'both') {
+            $q->bindValue(':parent', $parent, $this->db()::PARAM_STR);
+        }
+        if ($tag != NULL) {
+            $q->bindValue(':tag', $tag, $this->db()::PARAM_STR);
         }
 
         $q->execute();

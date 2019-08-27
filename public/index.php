@@ -1,26 +1,43 @@
 <?php
+
 require ('../controller/frontend.php');
 require ('../controller/backend.php');
-require ('../controller/sessionController.php');
+require ('../controller/Session.php');
+require ('../controller/Check.php');
 
 
 
 try {
     session_start();
+
     /*
     * Manage posts and comments view using frontend controller and backend controller to insert/update/delete from db
     */
     if (isset($_GET['action'])) {
         if ($_GET['action'] == 'home') {
-            // code...
+            homePage();
+        }
+        elseif ($_GET['action'] == 'list_articles') {
+            $parent = Check::wichParent();
+            $tag = Check::wichTag();
+            listContents($content = 'article', $parent, $tag);
         }
         elseif ($_GET['action'] == 'list_posts') {
-            listPosts();
+            listContents($content = 'post', $parents = NULL, $tag = NULL);
+        }
+        elseif ($_GET['action'] == 'article')
+        {
+            if (Check::isIdSet()) {
+                getContent($type = 'article', $_GET['id']);
+            }
+            else {
+                throw new Exception('Aucun idenditifiant de billet envoyé');
+            }
         }
         elseif ($_GET['action'] == 'post')
         {
-            if (isset($_GET['id']) && $_GET['id'] > 0) {
-                post($_GET['id']);
+            if (Check::isIdSet()) {
+                getContent($type = 'post', $_GET['id']);
             }
             else {
                 throw new Exception('Aucun idenditifiant de billet envoyé');
@@ -28,23 +45,18 @@ try {
         }
         // Will use backend controller to manage db
         elseif ($_GET['action'] == 'addComment') {
-            if (isset($_GET['id']) && (int)$_GET['id'] > 0) {
-                if (!empty($_POST['title']) && !empty($_SESSION['user_id']) && !empty($_POST['comment']) && !empty($_SESSION['pseudo'])) {
-                    addComment($_GET['id'], $_POST['title'], $_SESSION['user_id'], $_POST['comment'], $_SESSION['pseudo']);
-                }
-                else {
-                    throw new Exception('Tous les champs ne sont pas remplis.');
-                }
+            if (Check::commentFormOk()) {
+                addComment($_POST, Session::getUserId(), Session::getUserPseudo());
             }
             else {
-                throw new Exception('Aucun identifiant de billet envoyé');
+                throw new Exception('Tous les champs ne sont pas remplis.');
             }
         }
         elseif ($_GET['action'] == 'comment_edit' && isset($_SESSION['user_id']))
         {
-            if (isset($_GET['id']) && $_GET['id'] > 0)
+            if (Check::isIdSet())
             {
-                updateComment($_GET['id'], $_SESSION['user_id']);
+                updateComment($_GET['id'], Session::getUserId());
             }
             else {
                 throw new Exception('Aucun identifiant de commentaires envoyé');
@@ -52,27 +64,17 @@ try {
         }
         elseif ($_GET['action'] == 'comment_updated')
         {
-            if (isset($_GET['id']) && $_GET['id'] > 0) {
-                if (isset($_GET['id_comment']) && $_GET['id_comment'] > 0) {
-                    if (!empty($_POST['title']) && !empty($_SESSION['user_id']) && !empty($_POST['content'])) {
-                        updatedComment($_GET['id_comment'], $_SESSION['user_id'], $_POST['title'], $_POST['content']);
-                    }
-                    else {
-                        throw new Exception('Tous les champs ne sont pas remplis.');
-                    }
-                }
-                else {
-                    throw new Exception('Aucun identifiant de billet envoyé');
-                }
+            if (Check::commentFormOk()) {
+                updatedComment($_POST, Session::getUserId());
             }
             else {
-                throw new Exception('Aucun identifiant de billet envoyé');
+                throw new Exception('Tous les champs ne sont pas correctement remplis.');
             }
         }
         elseif ($_GET['action'] == 'delete_comment') {
-            if (isset($_GET['id']) && $_GET['id'] > 0) {
-                if (!empty($_SESSION['user_id'])) {
-                    deleteComment($_SESSION['user_id'], $_GET['id']);
+            if (Check::isIdSet()) {
+                if (Session::getUserId() > 0) {
+                    deleteComment(Session::getUserId(), $_GET['id']);
                 }
                 else {
                     throw new Exception('Vous n\'avez pas l\'autorisation requise');
@@ -176,43 +178,59 @@ try {
                 throw new Exception('Vous n\'avez pas l\'autorisation requise');
             }
         }
-        elseif ($_GET['action'] == 'addPost') {
+        elseif ($_GET['action'] == 'add_article') {
             if (Session::hasWriteAccess()) {
-                if (isset($_POST['title']) && isset($_POST['meta_title']) && isset($_POST['meta_desc']) && isset($_POST['content'])) {
-                    addPost(Session::getUserId(), $_POST['title'], $_POST['meta_title'], $_POST['meta_desc'], $_POST['content']);
+                if (Check::articleFormOk()) {
+                    addArticle($_POST);
                 }
                 else {
-                    throw new Exception('Merci de remplir tous les champs.');
+                    throw new Exception('Merci de remplir tous les champs');
                 }
             }
             else {
-                throw new Exception('Vous n\'avez pas l\'autorisation requise');
+                throw new Exception('Vous n\'avez pas l\'autorisation requise. 1');
             }
         }
-// TODO
-        elseif ($_GET['action'] == 'update_list_my_posts') {
+        elseif ($_GET['action'] == 'update_list_my_contents') {
             if (Session::hasWriteAccess()) {
-                $allPosts = false;
-                if (isset($_GET['type'])) {
-                    if ($_GET['type'] == 'chapter' OR $_GET['type'] == 'announcement' OR $_GET['type'] == 'general') {
-                        updateListPosts($allPosts, $_GET['type']);
+                $type = Check::wichType();
+                $tag = Check::wichTag();
+                $allContents = false;
+                if ($type == 'article') {
+                    updateListContents($type, $allContents, $tag);
+                }
+                elseif ($type == 'post') {
+                    if (Session::hasAdminAccess()) {
+                        updateListContents($type, $allContents, $tag);
                     }
                     else {
-                        updateListPosts($allPosts, $type = NULL);
+                        throw new Exception('Vous n\'avez pas l\'autorisation requise. 5');
                     }
                 }
                 else {
-                    updateListPosts($allPosts, $type = NULL);
+                    $type = 'article';
+                    updateListContents($type, $allContents, $tag);
                 }
             }
             else {
                 throw new Exception('Vous n\'avez pas l\'autorisation requise');
             }
         }
-        elseif ($_GET['action'] == 'updatePost') {
+        elseif ($_GET['action'] == 'update_content') {
             if (Session::hasWriteAccess()) {
-                if (isset($_GET['id']) && $_GET['id'] > 0) {
-                    updatePost($_GET['id']);
+                if (Check::isIdSet()) {
+                    $type = Check::wichType();
+                    if ($type =='article') {
+                        updateContent($type, $_GET['id']);
+                    }
+                    else {
+                        if (Session::hasAdminAccess()) {
+                            updateContent($type, $_GET['id']);
+                        }
+                        else {
+                            throw new Exception('Vous n\'avez pas l\'autorisation requise');
+                        }
+                    }
                 }
                 else {
                     throw new Exception('Aucun identifiant de billet envoyé');
@@ -222,10 +240,10 @@ try {
                 throw new Exception('Vous n\'avez pas l\'autorisation requise');
             }
         }
-        elseif ($_GET['action'] == 'updatedPost') {
+        elseif ($_GET['action'] == 'updated_article') {
             if (Session::hasWriteAccess()) {
-                if (isset($_POST['post_id']) && isset($_POST['title']) && isset($_POST['meta_title']) && isset($_POST['meta_desc']) && isset($_POST['content'])) {
-                    updatedPost($_POST['post_id'], $_POST['title'], $_POST['meta_title'], $_POST['meta_desc'], $_POST['content']);
+                if (isset($_POST['content_id']) && Check::articleFormOk()) {
+                    updatedArticle($_POST);
                 }
                 else {
                     throw new Exception('Merci de remplir tous les champs.');
@@ -236,33 +254,27 @@ try {
             }
         }
         // Editor and Admin
-        elseif ($_GET['action'] == 'update_list_posts') {
+        elseif ($_GET['action'] == 'update_list_contents') {
             if (Session::hasEditionAccess()) {
-                $allPosts = true;
-                if (isset($_GET['type'])) {
-                    if ($_GET['type'] == 'chapter' OR $_GET['type'] == 'announcement' OR $_GET['type'] == 'general') {
-                        updateListPosts($allPosts, $_GET['type']);
-                    }
-                    else {
-                        updateListPosts($allPosts, $type = NULL);
-                    }
-                }
-                else {
-                    updateListPosts($allPosts, $type = NULL);
-                }
+                $allContents = true;
+                $tag = Check::wichTag();
+                    updateListContents( $type = 'article', $allContents, $tag);
             }
             else {
                 throw new Exception('Vous n\'avez pas l\'autorisation requise');
             }
         }
-        elseif ($_GET['action'] == 'delete_post') {
+        elseif ($_GET['action'] == 'delete_content') {
             if (Session::hasEditionAccess()) {
-                if (isset($_GET['id']) && $_GET['id'] > 0) {
-                    if (!empty($_SESSION['user_id'])) {
-                        deletePost($_SESSION['user_id'], $_GET['id']);
+                if (Check::isIdSet()) {
+                    $type = Check::wichType();
+                    if ($type == 'article') {
+                        deleteContent(Session::getUserId(), $_GET['id'], $type);
                     }
-                    else {
-                        throw new Exception('Vous n\'avez pas l\'autorisation requise');
+                    elseif ($type == 'post') {
+                        if (Session::hasAdminAccess()) {
+                            deleteContent(Session::getUserId(), $_GET['id'], $type);
+                        }
                     }
                 }
                 else {
@@ -346,12 +358,38 @@ try {
                 throw new Exception('Vous n\'avez pas l\'autorisation requise');
             }
         }
+        elseif ($_GET['action'] == 'add_post') {
+            if (Session::hasAdminAccess()) {
+                if (Check::postFormOk()) {
+                    addPost(Session::getUserId(), $_POST['post_title'], $_POST['post_meta_title'], $_POST['post_meta_desc'], $_POST['post_content']);
+                }
+                else {
+                    throw new Exception('Merci de remplir tous les champs.');
+                }
+            }
+            else {
+                throw new Exception('Vous n\'avez pas l\'autorisation requise');
+            }
+        }
+        elseif ($_GET['action'] == 'updated_post') {
+            if (Session::hasAdminAccess()) {
+                if (isset($_POST['content_id']) && Check::postFormOk()) {
+                    updatedPost($_POST['content_id'], $_POST['post_title'], $_POST['post_meta_title'], $_POST['post_meta_desc'], $_POST['post_content']);
+                }
+                else {
+                    throw new Exception('Merci de remplir tous les champs.');
+                }
+            }
+            else {
+                throw new Exception('Vous n\'avez pas l\'autorisation requise');
+            }
+        }
         else {
-            listPosts($type = NULL);
+            homePage();;
         }
     }
     else {
-        listPosts($type = NULL);
+        homePage();;
     }
 } catch (Exception $e) {
     $errorMessage = $e->getMessage();

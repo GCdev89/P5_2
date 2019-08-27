@@ -1,4 +1,4 @@
-<?php $controlScript = '<script src="js/controlRegistration.js"></script>'; ?>
+<?php $myScript = '<script src="js/controlRegistration.js"></script>'; ?>
 
 <?php ob_start(); ?>
 <div class="row col-lg-12 mx-auto px-0 py-auto">

@@ -1,5 +1,5 @@
 <?php
-namespace Gaetan\P5\Model;
+namespace Gaetan\P5_2\Model;
 
 class Post
 {

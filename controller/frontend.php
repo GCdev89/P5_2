@@ -5,40 +5,67 @@
 require_once('../model/PostManager.php');
 require_once('../model/CommentManager.php');
 require_once('../model/UserManager.php');
+require_once('../model/ArticleManager.php');
+
 
 /*
 * Set frontoffice view if conditions are correct
 */
-function listPosts()
+function homePage()
 {
-    $postManager = new Gaetan\P5\Model\PostManager();
-    $userId = 0; // Allow to count every posts
-    $postCount = $postManager->count($userId);
-    $postsByPage = 3;
-    $countPages = ceil($postCount / $postsByPage);
+    $isActive = 'home';
+    require('../view/frontoffice/headerView.php');
+    require('../view/frontoffice/homeView.php');
+}
+function listContents($content, $parent, $tag)
+{
+    if ($content == 'article') {
+        $contentManager = new Gaetan\P5_2\Model\ArticleManager();
+        $contentsByPage = 6;
+        $view = '../view/frontoffice/listArticlesView.php';
+        $action = 'list_articles';
+        $isActive = $parent;
+        require('../view/frontoffice/sidebar.php');
+    }
+    elseif ($content == 'post') {
+        $contentManager = new Gaetan\P5_2\Model\PostManager();
+        $contentsByPage = 3;
+        $view = '../view/frontoffice/listPostsView.php';
+        $action = 'list_posts';
+        $isActive = 'blog';
+    }
+    $userId = 0;
+    $contentCount = $contentManager->count($userId);
+    $countPages = ceil($contentCount / $contentsByPage);
     if (isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $countPages) {
         $currentPage = intval($_GET['page']);
     }
     else {
         $currentPage = 1;
     }
-    $start = ($currentPage - 1) * $postsByPage;
+    $start = ($currentPage - 1) * $contentsByPage;
     $whereUser = 0;
-    $posts = $postManager->getListPosts($start, $postsByPage, $whereUser);
+    $contents = $contentManager->getList($start, $contentsByPage, $whereUser, $parent, $tag);
     $action = 'list_posts';
-    $isActive = 'blog';
     require('../view/pagination.php');
-    require('../view/frontoffice/listPostsView.php');
+    require($view);
 }
 
-function post($postId)
+function getContent($type, $contentId)
 {
-    $postManager = new Gaetan\P5\Model\PostManager();
-    $commentManager = new Gaetan\P5\Model\CommentManager();
-    if ($postManager->exists($postId)) {
-        $post = $postManager->getPost($postId);
+    if ($type == 'article') {
+        $contentManager = new Gaetan\P5_2\Model\ArticleManager();
+        $view = '../view/frontoffice/articleView.php';
+    }
+    elseif ($type == 'post') {
+        $contentManager = new Gaetan\P5_2\Model\PostManager();
+        $view = '../view/frontoffice/postView.php';
+    }
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
+    if ($contentManager->exists($contentId)) {
+        $thisContent = $contentManager->get($contentId);
 
-        $commentsCount = $commentManager->count($postId);
+        $commentsCount = $commentManager->count($contentId, $type);
         $commentsByPage = 10;
         $countPages = ceil($commentsCount / $commentsByPage);
         if (isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $countPages) {
@@ -49,11 +76,11 @@ function post($postId)
         }
         $start = ($currentPage - 1) * $commentsByPage;
 
-        $comments = $commentManager->getListComments($postId, $start, $commentsByPage);
-        $action = 'post&amp;id=' . $postId;
+        $comments = $commentManager->getListComments($contentId, $start, $commentsByPage, $type);
+        $action = $type . '&amp;id=' . $contentId;
 
         require('../view/pagination.php');
-        require('../view/frontoffice/postView.php');
+        require($view);
     }
     else {
         throw new Exception('Identifiant incorrect.');
@@ -73,7 +100,7 @@ function registered()
 
 function updateComment($commentId, $userId)
 {
-    $commentManager = new Gaetan\P5\Model\CommentManager();
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
     if ($commentManager->exists($commentId))
     {
         $comment = $commentManager->getComment($commentId);
@@ -81,17 +108,17 @@ function updateComment($commentId, $userId)
             require('../view/frontoffice/updateCommentView.php');
         }
         else {
-            throw new Exception('Identifiant incorrect.');
+            throw new Exception('Identifiant incorrect.1');
         }
     }
     else {
-        throw new Exception('Identifiant incorrect.');
+        throw new Exception('Identifiant incorrect.2');
     }
 }
 
 function userProfile($userId)
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
     if ($userManager->exists($userId)) {
         $user = $userManager->getUser($userId);
         require('../view/frontoffice/userProfileView.php');
@@ -108,26 +135,44 @@ function userProfile($userId)
 function newPost()
 {
     $isActive = 'newPost';
+    $postAction = 'add_post';
+    $articleAction = 'add_article';
+    require('../view/backoffice/postForm.php');
+    require('../view/backoffice/articleForm.php');
     require('../view/backoffice/newPostView.php');
 }
 
-function updatePost($postId)
+function updateContent($type, $contentId)
 {
-    $postManager = new Gaetan\P5\Model\PostManager();
-    if ($postManager->exists($postId))
+    if ($type == 'article') {
+        $contentManager = new Gaetan\P5_2\Model\ArticleManager();
+    }
+    else {
+        $contentManager = new Gaetan\P5_2\Model\PostManager();
+    }
+    if ($contentManager->exists($contentId))
     {
-        if ($_SESSION['role'] == 'writer') {
-            $post = $postManager->getPost($postId);
-            if ($post->userId() == $_SESSION['user_id']) {
-                require('../view/backoffice/updatePostView.php');
+        if (Session::hasWriteAccess()) {
+            $thisContent = $contentManager->get($contentId);
+            if ($thisContent->userId() == $_SESSION['user_id']) {
+                if ($type == 'article') {
+                    $articleAction = 'updated_article';
+                    require('../view/backoffice/articleForm.php');
+                }
+                elseif ($type == 'post') {
+                    $postAction = 'updated_post';
+                    require('../view/backoffice/postForm.php');
+                }
+                require('../view/backoffice/updateContentView.php');
             }
             else {
                 throw new Exception('Identifiant incorrect.');
             }
         }
         else {
-            $post = $postManager->getPost($postId);
-            require('../view/backoffice/updatePostView.php');
+            $content = $contentManager->get($contentId);
+            require('../view/backoffice/articleForm.php');
+            require('../view/backoffice/updateContentView.php');
         }
     }
     else {
@@ -136,48 +181,48 @@ function updatePost($postId)
 }
 
 // For editor and admin
-function updateListPosts($allPosts, $type)
+function updateListContents($type, $allContents, $tag)
 {
     // Test condition, either return all posts, or just those specific to one user
-    if ($allPosts == false) {
+    if ($allContents == false) {
         $userId = Session::getUserId();
         $whereUser = $userId;
-        $isActive = 'myPosts';
-        $action = 'update_list_my_posts';
+        $isActive = 'myContents';
+        $action = 'update_list_my_contents';
     }
     else {
         $userId = 0;
         $whereUser = 0;
-        $isActive = 'update_list_posts';
-        $action = 'update_list_posts';
+        $isActive = 'allContents';
+        $action = 'update_list_contents';
     }
-    $postManager = new Gaetan\P5\Model\PostManager();
-    $postCount = $postManager->count($userId, $type);
-    $postsByPage = 3;
-    $countPages = ceil($postCount / $postsByPage);
+    if ($type == 'article' OR $type == NULL) {
+        $contentManager = new Gaetan\P5_2\Model\ArticleManager();
+        $contentsByPage = 10;
+    }
+    elseif ($type == 'post') {
+        $contentManager = new Gaetan\P5_2\Model\PostManager();
+        $contentsByPage = 10;
+    }
+    $contentCount = $contentManager->count($userId, $type);
+    $countPages = ceil($contentCount / $contentsByPage);
     if (isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $countPages) {
         $currentPage = intval($_GET['page']);
     }
     else {
         $currentPage = 1;
     }
-    $start = ($currentPage - 1) * $postsByPage;
-    $posts = $postManager->getListPosts($start, $postsByPage, $type, $whereUser);
-    if ($type != NULL) {
-        $isTypeActive = $type;
-        require('../view/paginationByType.php');
-    }
-    else {
-        $isTypeActive = 'all';
-        require('../view/pagination.php');
-    }
-    require('../view/backoffice/updateListPostsView.php');
+    $start = ($currentPage - 1) * $contentsByPage;
+    $parent = NULL;
+    $contents = $contentManager->getList($start, $contentsByPage, $whereUser, $parent, $tag);
+    require('../view/paginationByType.php');
+    require('../view/backoffice/updateListView.php');
 }
 
 // For moderator and admin
 function moderation()
 {
-    $commentManager = new Gaetan\P5\Model\CommentManager();
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
     $reportCount = $commentManager->countReport();
     $reportsByPage = 10;
     $countPages = ceil($reportCount / $reportsByPage);
@@ -200,7 +245,7 @@ function moderation()
 
 function usersList()
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
     $usersCount =$userManager->count();
     $usersByPage = 20;
     $countPages = ceil($usersCount / $usersByPage);

@@ -1,5 +1,5 @@
 <?php
-namespace Gaetan\P5\Model;
+namespace Gaetan\P5_2\Model;
 
 require_once('../model/Manager.php');
 require_once('../model/Post.php');
@@ -32,9 +32,9 @@ class PostManager extends Manager
         return $affectedLines;
     }
 
-    public function getPost($postId)
+    public function get($postId)
     {
-        $q = $this->db()->prepare('SELECT u.pseudo userPseudo, p.id id, p.user_id userId, p.title title, p.content content, p.meta_title metaTitle, p.meta_desc metaDesc, DATE_FORMAT(p.date, \'%d/%m/%Y à %Hh%imin%ss\') AS date
+        $q = $this->db()->prepare('SELECT u.pseudo userPseudo, p.id id, p.user_id userId, p.title title, p.content content, p.meta_title metaTitle, p.meta_desc metaDesc, DATE_FORMAT(p.date, \'%d/%m/%Y\') AS date
         FROM user u
         INNER JOIN post p
         ON p.user_id = u.id
@@ -48,9 +48,9 @@ class PostManager extends Manager
         return $post;
     }
 
-    public function getListPosts($start, $postsByPage, $whereUser)
+    public function getList($start, $postsByPage, $whereUser)
     {
-        $query = 'SELECT u.pseudo userPseudo, p.id id, p.user_id userId, p.title title, p.content content, p.meta_title metaTitle, p.meta_desc metaDesc, DATE_FORMAT(p.date, \'%d/%m/%Y %Hh%imin\') AS date
+        $query = 'SELECT u.pseudo userPseudo, p.id id, p.user_id userId, p.title title, p.content content, p.meta_title metaTitle, p.meta_desc metaDesc, DATE_FORMAT(p.date, \'%d/%m/%Y\') AS date
         FROM user u
         INNER JOIN post p
             ON p.user_id = u.id

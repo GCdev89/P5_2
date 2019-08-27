@@ -1,30 +1,23 @@
+<?php $controlScript = '<script src="js/newContent.js"></script>'; ?>
+
 <?php ob_start(); ?>
 <div class="row col-lg-12 mx-auto px-0">
     <h2 class="h2 mb-4">Rédiger du contenu</h2>
-    <form action="index.php?action=addPost" method="post" class="col-12 mx-auto mb-5 p-auto bg-dark text-light rounded">
-        <div class="form-group">
-
-        </div>
-        <div class="form-group" >
-            <label for="title">Titre</label><br />
-            <input type="text" id="title" name="title" class="form-control" />
-        </div>
-        <div class="form-group">
-            <label for="content">Contenu</label><br />
-            <textarea id="content" name="content" class="form-control"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="meta_title">Meta titre</label><br />
-            <input type="text" id="meta_title" name="meta_title" class="form-control" />
-        </div>
-        <div class="form-group">
-            <label for="meta_desc">Meta description</label><br />
-            <textarea id="meta_desc" name="meta_desc" class="form-control"></textarea>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-warning text-dark font-weight-bold">Envoyer</button>
-        </div>
-    </form>
+    <div class="row col-md-12">
+        <?php if (Session::hasAdminAccess()): ?>
+            <h3>Que souhaitez vous souhaitez rédiger ?</h3>
+            <div class="form-group mx-3">
+                <button id="toggleArticleForm" class="btn btn-outline-dark">Un article</button>
+                <button id="togglePostForm" class="btn btn-outline-dark mx-3">Un billet de blog</button>
+            </div>
+            <div class="row col-12 m-0 p-0">
+                <?= $articleForm ?>
+                <?= $postForm ?>
+            </div>
+        <?php else: ?>
+            <?= $articleForm ?>
+        <?php endif; ?>
+    </div>
 </div>
 <?php $content = ob_get_clean(); ?>
 <?php

@@ -1,28 +1,20 @@
+<?php $myScript = '<script src="js/carousel.js"></script>'; ?>
+
+
 <?php ob_start(); ?>
-<div class="row mt-3 mx-auto px-auto">
-
-<?php foreach ($article as $anArticle): ?>
-    <div class="post col-lg-3 my-auto mx-4">
-        <div class="row d-flex justify-content-between bg-dark text-light rounded-top">
-            <p class="m-2 pt-1 pb-0"><span class="h4 text-warning font-italic"><?= htmlspecialchars($anArticle->title())?></span> par : <?= htmlspecialchars($anArticle->userPseudo())?>, le : <?= htmlspecialchars($anArticle->date())?></p>
+<div class="row mx-auto px-auto">
+    <div class="row d-flex justify-content-between mt-2">
+        <a href="index.php?action=list_articles&amp;parent=dad" class="font-weight-bolder mx-auto px-auto my-2 py-2 my-md-auto py-md-auto btn btn-outline-dark">Que vous soyez un papa ?</a>
+        <div class="col-lg-6">
+            <a href="index.php?action=list_articles" class="my-lg-auto py-auto text-decoration-none">
+                <p class="h4 text-center  text-dark p-2 bg-light border rounded">Que vous attendiez un enfant, ou bien qu'il soit déjà là, vous trouvez ici un ensemble de ressources pour vous aider à profiter pleinement de votre nouvelle vie en famille. <br />Cliquez pour retrouver nos articles</p>
+            </a>
         </div>
-        <div class="row">
-            <div class="post_content_overlay col-lg-12 p-0">
-                <div class="px-3 py-1 post_content bg-light" ><?= $anArticle->content()?></div>
-            </div>
-        </div>
+        <a href="index.php?action=list_articles&amp;parent=mom" class="font-weight-bolder mx-auto px-auto my-2 py-2 my-md-auto py-md-auto btn btn-outline-dark">Que vous soyez une maman ?</a>
     </div>
-    <div class="row col-lg-3 ml-2 my-3">
-        <p class="col-lg-12"><a href="index.php?action=article&amp;id=<?= htmlspecialchars($anArticle->id())?>" class="comment_btn btn btn-warning btn-sm font-weight-bold">Voir les commentaires</a></p>
-    </div>
-
-<?php endforeach; ?>
-
-
 </div>
-<?php if (isset($countPages) && $countPages > 1): ?>
-    <?= $pagination ?>
-<?php endif; ?>
+
+
 
 <?php $content = ob_get_clean(); ?>
 <?php

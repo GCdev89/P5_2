@@ -5,13 +5,13 @@
     <div class="collapse navbar-collapse ml-2" id="navbarAdmin">
         <ul class="navbar-nav">
             <?php if ($_SESSION['role'] == 'admin' OR $_SESSION['role'] == 'editor' OR $_SESSION['role'] == 'writer'): ?>
-                <li class="nav-item <?php if(isset($isActive) && $isActive == 'newPost'){echo'active';} ?>"><a href="index.php?action=new" class="nav-link">Nouveau billet</a></li>
+                <li class="nav-item <?php if(isset($isActive) && $isActive == 'newPost'){echo'active';} ?>"><a href="index.php?action=new" class="nav-link">Nouveau contenu</a></li>
             <?php endif; ?>
             <?php if ($_SESSION['role'] == 'admin' OR $_SESSION['role'] == 'editor' OR $_SESSION['role'] == 'writer'): ?>
-                <li class="nav-item <?php if(isset($isActive) && $isActive == 'myPosts'){echo'active';} ?>"><a href="index.php?action=update_list_my_posts" class="nav-link">Mes billets</a></li>
+                <li class="nav-item <?php if(isset($isActive) && $isActive == 'myContents'){echo'active';} ?>"><a href="index.php?action=update_list_my_contents&amp;type=article" class="nav-link">Mes contenus</a></li>
             <?php endif; ?>
             <?php if ($_SESSION['role'] == 'admin' OR $_SESSION['role'] == 'editor'): ?>
-                <li class="nav-item <?php if(isset($isActive) && $isActive == 'update_list_posts'){echo'active';} ?>"><a href="index.php?action=update_list_posts" class="nav-link">Liste des billets</a></li>
+                <li class="nav-item <?php if(isset($isActive) && $isActive == 'allContents'){echo'active';} ?>"><a href="index.php?action=update_list_contents" class="nav-link">Liste des contenus</a></li>
             <?php endif; ?>
             <?php if ($_SESSION['role'] == 'admin' OR $_SESSION['role'] == 'moderator'): ?>
                 <li class="nav-item <?php if(isset($isActive) && $isActive == 'moderation'){echo'active';} ?>"><a href="index.php?action=moderation" class="nav-link">Modération</a></li>

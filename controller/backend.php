@@ -2,9 +2,10 @@
 /*
 * Manage interactions with the DB, create/update/delete
 */
-require_once('../model/PostManager.php');
+/*require_once('../model/PostManager.php');
 require_once('../model/CommentManager.php');
 require_once('../model/UserManager.php');
+require_once('../model/ArticleManager.php');
 /*
 * Insert & update user's info into db
 */
@@ -18,10 +19,10 @@ function addUser($pseudo, $password, $mail)
         'password' => $hashPass,
         'mail' => $mail
     ];
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
 
     if (!$userManager->pseudoExists($_POST['pseudo']) && !$userManager->mailExists($_POST['mail'])) {
-        $user = new Gaetan\P5\Model\User($data);
+        $user = new Gaetan\P5_2\Model\User($data);
         $affectedLines = $userManager->add($user);
         if ($affectedLines == false) {
             throw new Exception('Impossible d\'enregistrer l\'utilisateur');
@@ -42,7 +43,7 @@ function addUser($pseudo, $password, $mail)
 
 function updateMail($userId, $mail, $password)
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
     if ($userManager->exists($userId)) {
         if (!$userManager->mailExists($mail)) {
             $user = $userManager->getUser($userId);
@@ -50,7 +51,7 @@ function updateMail($userId, $mail, $password)
 
             if ($isPasswordCorrect) {
                 $data = ['id' => $userId, 'mail' => $mail];
-                $userUpdated = new Gaetan\P5\Model\User($data);
+                $userUpdated = new Gaetan\P5_2\Model\User($data);
                 $affectedLines = $userManager->updateMail($userUpdated);
                 if ($affectedLines == false) {
                     throw new Exception('Impossible de modifier le mail.');
@@ -74,7 +75,7 @@ function updateMail($userId, $mail, $password)
 
 function updatePassword($userId, $password, $newPassword)
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
     if ($userManager->exists($userId)) {
         $user = $userManager->getUser($userId);
 
@@ -82,7 +83,7 @@ function updatePassword($userId, $password, $newPassword)
         if ($isPasswordCorrect) {
             $hashPass = password_hash($newPassword, PASSWORD_DEFAULT);
             $data = ['id' => $userId, 'password' => $hashPass];
-            $userUpdated = new Gaetan\P5\Model\User($data);
+            $userUpdated = new Gaetan\P5_2\Model\User($data);
             $affectedLines = $userManager->updatePassword($userUpdated);
             if ($affectedLines == false) {
                 throw new Exception('Impossible de modifier le mot de passe.');
@@ -104,7 +105,7 @@ function updatePassword($userId, $password, $newPassword)
 */
 function connection($pseudo, $password)
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
 
     if ($userManager->pseudoExists($pseudo)) {
         $user = $userManager->getUser($pseudo);
@@ -136,47 +137,56 @@ function disconnect()
 /*
 * Comment management create/update/delete/report
 */
-function addComment($postId, $title, $userId, $content, $userPseudo)
+function addComment($data, $userId, $userPseudo)
 {
-    $data = [
-    'postId' => $postId,
-    'title' => $title,
+    $dataToSend = [
+    'contentId' => $data['content_id'],
     'userId' => $userId,
-    'content' => $content,
+    'content' => $data['comment'],
+    'type' => $data['type']
     ];
-    $comment = new Gaetan\P5\Model\Comment($data);
-    $commentManager = new Gaetan\P5\Model\CommentManager();
-    $affectedLines = $commentManager->add($comment);
+    if ($type == 'article') {
+        $contentManager = new Gaetan\P5_2\Model\ArticleManager();
+    }
+    else  {
+        $contentManager = new Gaetan\P5_2\Model\PostManager();
+    }
+    if ($contentManager->exists($data['content_id'])) {
+        $comment = new Gaetan\P5_2\Model\Comment($dataToSend);
+        $commentManager = new Gaetan\P5_2\Model\CommentManager();
+        $affectedLines = $commentManager->add($comment);
 
-    if ($affectedLines == false) {
-        throw new Exception('Impossible d\'ajouter le commentaire.');
+        if ($affectedLines == false) {
+            throw new Exception('Impossible d\'ajouter le commentaire.');
+        }
+        else {
+            $dataToJson = $dataToSend;
+            $dataToJson['userPseudo'] = $userPseudo;
+            $commentJson = json_encode($dataToJson);
+            echo $commentJson;
+        }
     }
     else {
-        //header('Location: index.php?action=post&id=' . $postId);
-        $dataToJson = $data;
-        $dataToJson['user_pseudo'] = $userPseudo;
-        $commentJson = json_encode($dataToJson);
-        echo $commentJson;
+        throw new Exception('Impossible d\'ajouter le commentaire.');
     }
 }
 
-function updatedComment($commentId, $userId, $title, $content)
+function updatedComment($data, $userId)
 {
-    $commentManager = new Gaetan\P5\Model\CommentManager();
-    if ($commentManager->exists($commentId))
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
+    if ($commentManager->exists($data['content_id']))
     {
-        $comment = $commentManager->getComment($commentId);
+        $comment = $commentManager->getComment($data['content_id']);
         if ($comment->userId() == $userId) {
-            $data = ['id' => $commentId,
-                    'title' => $title,
-                    'content' => $content];
-            $commentUpdated = new Gaetan\P5\Model\Comment($data);
+            $dataToUpdate = ['id' => $data['content_id'],
+                    'content' => $data['comment']];
+            $commentUpdated = new Gaetan\P5_2\Model\Comment($dataToUpdate);
             $affectedLines = $commentManager->update($commentUpdated);
             if ($affectedLines == false) {
                 throw new Exception('Impossible de modifier le commentaire.');
             }
             else {
-                header('Location: index.php?action=post&id=' . $comment->postId());
+                header('Location: index.php?action=' . $data['type'] .'&id=' . $comment->contentId());
             }
         }
         else {
@@ -190,7 +200,8 @@ function updatedComment($commentId, $userId, $title, $content)
 
 function deleteComment($userId, $commentId)
 {
-    $commentManager = new Gaetan\P5\Model\CommentManager();
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
+
     if ($commentManager->exists($commentId)) {
         $comment = $commentManager->getComment($commentId);
         if ($comment->userId() == $userId) {
@@ -199,7 +210,7 @@ function deleteComment($userId, $commentId)
                 throw new Exception('Il vous est impossible de faire cette action');
             }
             else {
-                header('Location: index.php?action=post&id=' . $comment->postId());
+                header('Location: index.php?action=' . $comment->type() . '&id=' . $comment->contentId());
             }
         }
         else {
@@ -211,9 +222,9 @@ function deleteComment($userId, $commentId)
     }
 }
 
-function report($commentId, $userId)
+function report($type, $commentId, $userId)
 {
-    $commentManager = new Gaetan\P5\Model\CommentManager();
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
     if ($commentManager->exists($commentId))
     {
         $comment = $commentManager->getComment($commentId);
@@ -221,7 +232,7 @@ function report($commentId, $userId)
             $newReport = $comment->report() + 1 ;
             $data = ['id' => $commentId,
                     'report' => $newReport];
-            $commentReported = new Gaetan\P5\Model\Comment($data);
+            $commentReported = new Gaetan\P5_2\Model\Comment($data);
             $affectedLines = $commentManager->report($commentReported);
             if ($affectedLines == false) {
                 throw new Exception('Impossible de signaler le commentaire.');
@@ -241,62 +252,101 @@ function report($commentId, $userId)
 /*
 * Actions from the admin pannel
 */
-/*
-* Posts management create/update/delete
-*/
-function addPost($userId, $title, $metaTitle, $metaDesc, $content)
-{
-    $data = ['userId' => $userId,
-            'title' => $title,
-            'content' => $content,
-            'metaTitle' => $metaTitle,
-            'metaDesc' => $metaDesc];
-    $post = new Gaetan\P5\Model\Post($data);
-    var_dump($post);
-    $postManager = new Gaetan\P5\Model\PostManager();
 
-    $affectedLines = $postManager->add($post);
+ //Contents management create/update/delete
+// Writer, Editor, Admin
+function addArticle($data)
+{
+    $dataToSend = ['userId' => Session::getUserId(),
+            'title' => $data['article_title'],
+            'content' => $data['article_content'],
+            'description' => $data['description'],
+            'parent' => $data['parent'],
+            'tag' => $data['tag'],
+            'metaTitle' => $data['article_meta_title'],
+            'metaDesc' => $data['article_meta_desc']
+            ];
+    $article = new Gaetan\P5_2\Model\Article($dataToSend);
+    $articleManager = new Gaetan\P5_2\Model\ArticleManager();
+    $affectedLines = $articleManager->add($article);
 
     if ($affectedLines == false) {
-        throw new Exception('Impossible d\'ajouter le commentaire.');
+        throw new Exception('Impossible d\'ajouter l\'article.');
     }
     else {
-        header('Location: index.php?action=listPosts');
+        header('Location: index.php?action=update_list_my_contents');
     }
 }
 
-function updatedPost($id, $title, $metaTitle, $metaDesc, $content)
+function updatedArticle($data)
 {
-    $postManager = new Gaetan\P5\Model\PostManager();
-    if ($postManager->exists($id))
+    $articleManager = new Gaetan\P5_2\Model\ArticleManager();
+    if ($articleManager->exists($data['content_id']))
     {
-        $data = ['id' => $id,
-                'title' => $title,
-                'content' => $content,
-                'metaTitle' => $metaTitle,
-                'metaDesc' => $metaDesc];
-        $post = new Gaetan\P5\Model\Post($data);
-        $affectedLines = $postManager->update($post);
+        $dataToSend = ['id' => $data['content_id'],
+                'title' => $data['article_title'],
+                'content' => $data['article_content'],
+                'description' => $data['description'],
+                'parent' => $data['parent'],
+                'tag' => $data['tag'],
+                'metaTitle' => $data['article_meta_title'],
+                'metaDesc' => $data['article_meta_desc']
+                ];
+
+        $article = new Gaetan\P5_2\Model\Article($dataToSend);
+        $affectedLines = $articleManager->update($article);
         if ($affectedLines == false) {
-            throw new Exception('Impossible de modifier le billet.');
+            throw new Exception('Impossible de modifier l\article.');
         }
         else {
-            header('Location: index.php?action=update_list_my_posts');
+            header('Location: index.php?action=update_list_my_contents');
         }
     }
     else {
-        throw new Exception('Identifiant de billet incorrect.');
+        throw new Exception('Identifiant de d\'article incorrect.');
     }
 }
 
-function deletePost($userId, $postId)
+// Editor, Admin
+function deleteContent($userId, $contentId, $type)
 {
-    $postManager = new Gaetan\P5\Model\PostManager();
+    if ($type == 'article') {
+        $contentManager = new Gaetan\P5_2\Model\ArticleManager();
+
+    }
+    elseif ($type == 'post') {
+        $contentManager = new Gaetan\P5_2\Model\PostManager();
+
+    }
+    if ($contentManager->exists($contentId)) {
+        $thisContent = $contentManager->get($contentId);
+        $affectedLines = $contentManager->delete($contentId);
+        $commentManager = new Gaetan\P5_2\Model\CommentManager();
+        if ($commentManager->count($thisContent->id(), $type) > 0) {
+            $commentsDeleted = $commentManager->deleteContentComments($contentId, $type);
+        }
+        else {
+            $commentsDeleted = true;
+        }
+        if ($affectedLines == false OR $commentsDeleted == false) {
+            throw new Exception('Il vous est impossible de faire cette action');
+        }
+        else {
+            header('Location: index.php?action=update_list_contents');
+        }
+    }
+    else {
+        throw new Exception('Aucun identifiant de billet envoyé');
+    }
+}
+/*function deleteContent($userId, $contentId)
+{
+    $postManager = new Gaetan\P5_2\Model\PostManager();
     if ($postManager->exists($postId)) {
         $post = $postManager->getPost($postId);
         if ($post->userId() == $userId) {
             $affectedLines = $postManager->delete($postId);
-            $commentManager = new Gaetan\P5\Model\CommentManager();
+            $commentManager = new Gaetan\P5_2\Model\CommentManager();
             $commentsDeleted = $commentManager->deletePostComments($postId);
             if ($affectedLines == false OR $commentsDeleted == false) {
                 throw new Exception('Il vous est impossible de faire cette action');
@@ -312,6 +362,51 @@ function deletePost($userId, $postId)
     else {
         throw new Exception('Aucun identifiant de billet envoyé');
     }
+}*/
+
+// Admin
+function addPost($userId, $title, $metaTitle, $metaDesc, $content)
+{
+    $data = ['userId' => $userId,
+            'title' => $title,
+            'content' => $content,
+            'metaTitle' => $metaTitle,
+            'metaDesc' => $metaDesc];
+    $post = new Gaetan\P5_2\Model\Post($data);
+    $postManager = new Gaetan\P5_2\Model\PostManager();
+
+    $affectedLines = $postManager->add($post);
+
+    if ($affectedLines == false) {
+        throw new Exception('Impossible d\'ajouter le commentaire.');
+    }
+    else {
+        header('Location: index.php?action=listPosts');
+    }
+}
+
+function updatedPost($id, $title, $metaTitle, $metaDesc, $content)
+{
+    $postManager = new Gaetan\P5_2\Model\PostManager();
+    if ($postManager->exists($id))
+    {
+        $data = ['id' => $id,
+                'title' => $title,
+                'content' => $content,
+                'metaTitle' => $metaTitle,
+                'metaDesc' => $metaDesc];
+        $post = new Gaetan\P5_2\Model\Post($data);
+        $affectedLines = $postManager->update($post);
+        if ($affectedLines == false) {
+            throw new Exception('Impossible de modifier le billet.');
+        }
+        else {
+            header('Location: index.php?action=update_list_my_posts');
+        }
+    }
+    else {
+        throw new Exception('Identifiant de billet incorrect.');
+    }
 }
 
 /*
@@ -320,7 +415,7 @@ function deletePost($userId, $postId)
 // Moderator, admin
 function ignoreComment($commentId)
 {
-    $commentManager = new Gaetan\P5\Model\CommentManager();
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
     if ($commentManager->exists($commentId))
     {
         $comment = $commentManager->getComment($commentId);
@@ -328,7 +423,7 @@ function ignoreComment($commentId)
             $report = 0;
             $data = ['id' => $commentId,
                     'report' => $report];
-            $commentReported = new Gaetan\P5\Model\Comment($data);
+            $commentReported = new Gaetan\P5_2\Model\Comment($data);
             $affectedLines = $commentManager->report($commentReported);
             if ($affectedLines == false) {
                 throw new Exception('Impossible d\'ignorer le signalement.');
@@ -348,7 +443,7 @@ function ignoreComment($commentId)
 
 function deleteReported($commentId)
 {
-    $commentManager = new Gaetan\P5\Model\CommentManager();
+    $commentManager = new Gaetan\P5_2\Model\CommentManager();
     if ($commentManager->exists($commentId)) {
         $comment = $commentManager->getComment($commentId);
         if ($comment->report() == 1) {
@@ -374,14 +469,14 @@ function deleteReported($commentId)
 // Admin
 function updateRole($userId, $role)
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
     $userId = (int) $userId;
     if ($userManager->exists($userId)) {
         $userToUpdate = $userManager->getUser($userId);
         if ($userToUpdate->role() != 'admin') {
             if ($role == 'editor' OR $role == 'writer' OR $role == 'moderator' OR $role == 'common_user') {
                 $data = ['id' => $userId, 'role' => $role];
-                $userUpdated = new Gaetan\P5\Model\User($data);
+                $userUpdated = new Gaetan\P5_2\Model\User($data);
                 $affectedLines = $userManager->updateRole($userUpdated);
                 if ($affectedLines == false) {
                     throw new Exception('Il vous est impossible de faire cette action');
@@ -405,10 +500,10 @@ function updateRole($userId, $role)
 
 function deleteUser($userId)
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
     if ($userManager->exists($userId)) {
         if ($userId != $_SESSION['user_id']) {
-            $commentManager = new Gaetan\P5\Model\CommentManager();
+            $commentManager = new Gaetan\P5_2\Model\CommentManager();
             $userToDelete = $userManager->getUser($userId);
             if ($userToDelete->role() != 'admin') {
                 $affectedLines = $userManager->delete($userId);
@@ -436,10 +531,10 @@ function deleteUser($userId)
 // Moderator
 function deleteCommonUser($userId)
 {
-    $userManager = new Gaetan\P5\Model\UserManager();
+    $userManager = new Gaetan\P5_2\Model\UserManager();
     if ($userManager->exists($userId)) {
         if ($userId != $_SESSION['user_id']) {
-            $commentManager = new Gaetan\P5\Model\CommentManager();
+            $commentManager = new Gaetan\P5_2\Model\CommentManager();
             $userToDelete = $userManager->getUser($userId);
             if ($userToDelete->role() == 'common_user') {
                 $affectedLines = $userManager->delete($userId);
