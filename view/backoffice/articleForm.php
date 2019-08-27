@@ -1,5 +1,5 @@
 <?php ob_start(); ?>
-<form id="articleForm" action="index.php?action=<?= htmlspecialchars($articleAction) ?>" method="post" class="col-12 mx-auto mb-5 p-auto bg-dark text-light rounded">
+<form id="articleForm" action="index.php?action=<?= htmlspecialchars($articleAction) ?>" method="post" class="col-lg-12 mx-auto mb-5 p-auto bg-dark text-light rounded">
     <h3>Edition d'article</h3>
     <div class="form-group form-inline mt-4">
         <label for="parent">A quel parent s'adresse cet article ?</label>

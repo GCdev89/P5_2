@@ -2,10 +2,6 @@
 /*
 * Manage interactions with the DB, create/update/delete
 */
-/*require_once('../model/PostManager.php');
-require_once('../model/CommentManager.php');
-require_once('../model/UserManager.php');
-require_once('../model/ArticleManager.php');
 /*
 * Insert & update user's info into db
 */
@@ -145,7 +141,7 @@ function addComment($data, $userId, $userPseudo)
     'content' => $data['comment'],
     'type' => $data['type']
     ];
-    if ($type == 'article') {
+    if ($data['type'] == 'article') {
         $contentManager = new Gaetan\P5_2\Model\ArticleManager();
     }
     else  {
@@ -222,7 +218,7 @@ function deleteComment($userId, $commentId)
     }
 }
 
-function report($type, $commentId, $userId)
+function report($commentId, $userId)
 {
     $commentManager = new Gaetan\P5_2\Model\CommentManager();
     if ($commentManager->exists($commentId))
@@ -238,7 +234,7 @@ function report($type, $commentId, $userId)
                 throw new Exception('Impossible de signaler le commentaire.');
             }
             else {
-                header('Location: index.php?action=post&id=' . $comment->postId());
+                header('Location: index.php?action=' . $comment->type() .'&id=' . $comment->contentId());
             }
         }
         else {
@@ -339,30 +335,6 @@ function deleteContent($userId, $contentId, $type)
         throw new Exception('Aucun identifiant de billet envoyé');
     }
 }
-/*function deleteContent($userId, $contentId)
-{
-    $postManager = new Gaetan\P5_2\Model\PostManager();
-    if ($postManager->exists($postId)) {
-        $post = $postManager->getPost($postId);
-        if ($post->userId() == $userId) {
-            $affectedLines = $postManager->delete($postId);
-            $commentManager = new Gaetan\P5_2\Model\CommentManager();
-            $commentsDeleted = $commentManager->deletePostComments($postId);
-            if ($affectedLines == false OR $commentsDeleted == false) {
-                throw new Exception('Il vous est impossible de faire cette action');
-            }
-            else {
-                header('Location: index.php?action=update_list_posts');
-            }
-        }
-        else {
-            throw new Exception('Il vous est impossible de faire cette action');
-        }
-    }
-    else {
-        throw new Exception('Aucun identifiant de billet envoyé');
-    }
-}*/
 
 // Admin
 function addPost($userId, $title, $metaTitle, $metaDesc, $content)
@@ -381,7 +353,7 @@ function addPost($userId, $title, $metaTitle, $metaDesc, $content)
         throw new Exception('Impossible d\'ajouter le commentaire.');
     }
     else {
-        header('Location: index.php?action=listPosts');
+        header('Location: index.php?action=list_posts');
     }
 }
 
@@ -446,7 +418,7 @@ function deleteReported($commentId)
     $commentManager = new Gaetan\P5_2\Model\CommentManager();
     if ($commentManager->exists($commentId)) {
         $comment = $commentManager->getComment($commentId);
-        if ($comment->report() == 1) {
+        if ($comment->report() >= 1) {
             $affectedLines = $commentManager->delete($commentId);
             if ($affectedLines == false) {
                 throw new Exception('Il vous est impossible de faire cette action');

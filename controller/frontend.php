@@ -46,7 +46,6 @@ function listContents($content, $parent, $tag)
     $start = ($currentPage - 1) * $contentsByPage;
     $whereUser = 0;
     $contents = $contentManager->getList($start, $contentsByPage, $whereUser, $parent, $tag);
-    $action = 'list_posts';
     require('../view/pagination.php');
     require($view);
 }
@@ -55,11 +54,9 @@ function getContent($type, $contentId)
 {
     if ($type == 'article') {
         $contentManager = new Gaetan\P5_2\Model\ArticleManager();
-        $view = '../view/frontoffice/articleView.php';
     }
     elseif ($type == 'post') {
         $contentManager = new Gaetan\P5_2\Model\PostManager();
-        $view = '../view/frontoffice/postView.php';
     }
     $commentManager = new Gaetan\P5_2\Model\CommentManager();
     if ($contentManager->exists($contentId)) {
@@ -80,7 +77,7 @@ function getContent($type, $contentId)
         $action = $type . '&amp;id=' . $contentId;
 
         require('../view/pagination.php');
-        require($view);
+        require('../view/frontoffice/contentView.php');
     }
     else {
         throw new Exception('Identifiant incorrect.');

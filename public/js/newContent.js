@@ -1,18 +1,22 @@
-document.addEventListener("DOMContentLoaded", toggleArticleForm); // Lance la fonction onReady qui initialise l'appli si la page est chargée
-if (document.readyState !== "loading") { // Lance le script si l'état est différent de loading
-  toggleArticleForm();
+/*
+* This script allow the admin to display the post form or the article form
+*/
+
+document.addEventListener("DOMContentLoaded", displayArticleForm);
+if (document.readyState !== "loading") {
+  displayArticleForm();
 }
 
-document.getElementById("togglePostForm").addEventListener("click", togglePostForm)
+document.getElementById("displayPostForm").addEventListener("click", displayPostForm)
 
-document.getElementById("toggleArticleForm").addEventListener("click", toggleArticleForm)
+document.getElementById("displayArticleForm").addEventListener("click", displayArticleForm)
 
-function toggleArticleForm() {
+function displayArticleForm() {
     document.getElementById("postForm").style.display = "none";
     document.getElementById("articleForm").style.display = "block";
 }
 
-function togglePostForm() {
+function displayPostForm() {
     document.getElementById("postForm").style.display = "block";
     document.getElementById("articleForm").style.display = "none";
 }

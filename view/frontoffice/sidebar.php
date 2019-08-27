@@ -1,5 +1,5 @@
 <?php ob_start(); ?>
-<nav class="col-lg-1  bg-light border-right" id="sidebar">
+<nav class="col-lg-1 d-none d-lg-block bg-light border-right" id="sidebar">
     <div class="navbar-light my-auto">
         <h5 class="h3 text-dark mt-2">Catégories</h5>
         <ul class="navbar-nav flex-column nav-dark">

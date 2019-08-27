@@ -2,15 +2,21 @@
 <html lang="fr">
     <head>
         <meta charset="utf-8" />
-        <title>Projet 5</title>
+        <?php if (isset($metaTitle)): ?>
+            <title><?= $metaTitle ?></title>
+            <?php else: ?>
+                <title>Code Bébé</title>
+        <?php endif; ?>
+        <?php if (isset($metaDesc)): ?>
+            <meta name="description" content="<?= $metaDesc ?>" />
+            <?php else: ?>
+                <meta name="description" content="Bienvenue sur Code Bébé, nous cherchons à vous accompagner au mieux dans la nouvelle vie qui vous attends." />
+        <?php endif; ?>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <script src="tinymce/tinymce.js" referrerpolicy="origin"></script>
-        <script>
-        tinymce.init({
-            language : "fr_FR",
-            selector: '.content'
-        });
-        </script>
+        <?php if (isset($tinyScript)): ?>
+            <?= $tinyScript ?>
+        <?php endif; ?>
+
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="../public/css/styleMain.css" rel="stylesheet" />
@@ -25,7 +31,7 @@
                 <?php if (isset($sidebar)): ?>
                     <?= $sidebar ?>
                 <?php endif; ?>
-                <main class="col-12 col-md-10 m-0 p-0 mx-lg-auto px-lg-auto">
+                <main class="col-lg-10 m-0 p-0 mx-lg-auto px-lg-auto">
                     <?php if (isset($headerHero)): ?>
                         <?= $headerHero ?>
                         <?php else: ?>
@@ -37,9 +43,7 @@
                     <?php endif; ?>
 
                     <div class="row col-lg-12 mx-0 px-0 mx-md-auto">
-                        <div class="col-lg-10 mx-0 mx-md-auto mb-2">
-                                <?= $content ?>
-                        </div>
+                        <?= $content ?>
                     </div>
                 </main>
 

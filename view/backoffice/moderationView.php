@@ -6,7 +6,7 @@
     <table class="table table-responsive-md table-striped table-dark">
         <thead>
             <th scope="col">Auteur</th>
-            <th scope="col">Titre du commentaire</th>
+            <th scope="col">Type de contenu</th>
             <th scope="col">Contenu</th>
             <th scope="col">Date de création</th>
             <th scope="col">Signalements</th>
@@ -16,7 +16,7 @@
                 <?php foreach ($comments as $aComment): ?>
                     <tr>
                         <td><?=htmlspecialchars($aComment->userPseudo())?></td>
-                        <td><?=htmlspecialchars($aComment->title())?></td>
+                        <td><?=htmlspecialchars($aComment->type())?></td>
                         <td><?=$aComment->content()?></td>
                         <td><?=htmlspecialchars($aComment->date())?></td>
                         <td><span class="badge badge-warning"><?=htmlspecialchars($aComment->report())?></span></td>

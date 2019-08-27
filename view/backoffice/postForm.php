@@ -1,5 +1,5 @@
 <?php ob_start(); ?>
-<form id="postForm" action="index.php?action=<?= $postAction ?>" method="post" class="col-12 mx-auto mb-5 p-auto bg-dark text-light rounded">
+<form id="postForm" action="index.php?action=<?= $postAction ?>" method="post" class="col-lg-12 mx-auto mb-5 p-auto bg-dark text-light rounded">
     <h3>Edition de billet</h3>
     <div class="form-group" >
         <label for="post_title">Titre</label><br />

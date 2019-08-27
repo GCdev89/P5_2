@@ -2,7 +2,7 @@
 
 <?php ob_start(); ?>
 <div class="col-12 mx-auto mb-4 px-0">
-    <div class="row">
+    <div class="row mx-2 mx-lg-auto">
         <table class="table table-responsive-md table-striped table-dark">
             <thead>
                 <th scope="col">Pseudo</th>
@@ -19,7 +19,7 @@
             </tbody>
         </table>
     </div>
-    <div class="row mt-3 mx-auto px-0 bg-dark rounded">
+    <div class="row mt-3 mx-2 mx-lg-auto px-0 bg-dark rounded">
         <div class="col-md-3 order-2 order-lg-1 mx-auto my-lg-auto mr-lg-4">
             <h3 class=" text-light">Modifier votre mail</h3>
             <form id="mail_update" class="form ml-2" action="index.php?action=update_mail" method="post" >
@@ -35,7 +35,7 @@
                 </div>
             </form>
         </div>
-        <div id="registrationHelp" class="col-lg-3 order-1 order-lg-2 mt-5 mx-auto my-lg-auto mb-5 pb-3 px-auto bg-light rounded">
+        <div id="registrationHelp" class="col-lg-3 order-1 order-lg-2 mt-5 mx-1 mx-lg-auto my-lg-auto mb-5 pb-3 px-auto bg-light rounded">
             <h4 class="h5 mt-2 mb-3">Pour mettre à jour vos données vous devez :</h4>
             <ul class="list-group">
                 <li id="updateMailHelp" class="list-group-item">Renseigner une adresse mail valide</li>

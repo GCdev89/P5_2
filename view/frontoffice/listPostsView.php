@@ -1,5 +1,10 @@
+<?php
+$metaTitle = 'Code Bébé - Le blog';
+$metaDesc = 'Bienvenue sur le blog de Code Bébé, l\'auteur partagera ici ses expériences personnelles avec vous. On peut aussi apprendre de l\'expérience des autres.';
+?>
+
 <?php ob_start(); ?>
-<div class="row mt-3 mx-auto px-auto">
+<div class="row mt-3 mx-2 mx-lg-auto px-auto">
 <?php foreach ($contents as $aPost): ?>
     <div class="post col-lg-12 my-auto">
         <div class="row d-flex justify-content-between bg-dark text-light rounded-top">

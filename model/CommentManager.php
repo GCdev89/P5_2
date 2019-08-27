@@ -108,15 +108,10 @@ class CommentManager extends Manager
 
     public function deleteContentComments($contentId, $type)
     {
-        if ($type == 'article') {
-            $commentTable = 'article_comment';
-        }
-        elseif ($type == 'post') {
-            $commentTable = 'post_comment';
-        }
-        $q = $this->db()->prepare('DELETE FROM :comment_table WHERE post_id = :post_id');
-        $q->bindValue(':comment_table', $commentTable, $this->db()::PARAM_STR);
-        $q->bindValue(':post_id', $contentId, $this->db()::PARAM_INT);
+
+        $q = $this->db()->prepare('DELETE FROM comment WHERE content_id = :content_id AND type = :type');
+        $q->bindValue(':content_id', $contentId, $this->db()::PARAM_INT);
+        $q->bindValue(':type', $type, $this->db()::PARAM_STR);
         $commentsDeleted = $q->execute();
 
         return $commentsDeleted;
@@ -124,16 +119,8 @@ class CommentManager extends Manager
 
     public function deleteUserComments($userId)
     {
-        $q = $this->db()->prepare('DELETE FROM post_comment WHERE user_id = :user_id');
-        $commentsPostDeleted = $q->execute(array('user_id' => $userId));
-        $q2 = $this->db()->prepare('DELETE FROM article_comment WHERE user_id = :user_id');
-        $commentsArticleDeleted = $q2->execute(array('user_id' => $userId));
-        if ($commentsPostDeleted == true && $commentsArticleDeleted == true) {
-            $commentsDeleted = true;
-        }
-        else {
-            $commentsDeleted = false;
-        }
+        $q = $this->db()->prepare('DELETE FROM comment WHERE user_id = :user_id');
+        $commentsDeleted = $q->execute(array('user_id' => $userId));
         return $commentsDeleted;
     }
 
@@ -146,14 +133,8 @@ class CommentManager extends Manager
 
     public function count($contentId, $type)
     {
-        if ($type == 'article') {
-            $q = $this->db()->prepare('SELECT COUNT(*) AS count FROM article_comment WHERE article_id = :article_id');
-            $q->execute(array('article_id' => $contentId));
-        }
-        elseif ($type == 'post') {
-            $q = $this->db()->prepare('SELECT COUNT(*) AS count FROM post_comment WHERE post_id = :post_id');
-            $q->execute(array('post_id' => $contentId));
-        }
+        $q = $this->db()->prepare('SELECT COUNT(*) AS count FROM comment WHERE content_id = :content_id AND type = :type');
+        $q->execute(array('content_id' => $contentId, 'type' => $type));
         $data = $q->fetch();
         $q->closeCursor();
         $commentsCount = $data['count'];
@@ -163,7 +144,7 @@ class CommentManager extends Manager
 
     public function countReport()
     {
-        $q = $this->db()->query('SELECT COUNT(*) AS count_report FROM post_comment WHERE report >= 1 ');
+        $q = $this->db()->query('SELECT COUNT(*) AS count_report FROM comment WHERE report >= 1 ');
         $data = $q->fetch();
         $q->closeCursor();
         $countReport = $data['count_report'];

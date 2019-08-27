@@ -1,3 +1,14 @@
+<?php
+$tinyScript = '<script src="tinymce/tinymce.js" referrerpolicy="origin"></script>
+        <script>
+        tinymce.init({
+            language : "fr_FR",
+            selector: \'.content\'
+        });
+        </script>';
+
+?>
+
 <?php ob_start(); ?>
 <h3 class="h2 my-md-5">Modifier le contenu</h3>
 

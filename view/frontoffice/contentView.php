@@ -1,9 +1,11 @@
-<?php $myScript = '<script src="js/commentFetch.js"></script>'; ?>
-
-
+<?php
+$myScript = '<script src="js/commentFetch.js"></script>';
+$metaTitle = $thisContent->metaTitle();
+$metaDesc = $thisContent->metaDesc();
+?>
 <?php ob_start(); ?>
 
-<div class="row mt-3 mx-auto px-auto">
+<div class="row mt-3 mx-2 mx-md-auto px-auto">
     <div class="article col-lg-12 my-auto">
         <div class="row d-flex bg-dark text-light rounded-top">
             <p class="m-2 pt-1 pb-0"><span class="h4 text-warning font-italic"><?= htmlspecialchars($thisContent->title())?></span> par : <?= htmlspecialchars($thisContent->userPseudo())?>, le : <?= htmlspecialchars($thisContent->date())?></p>
@@ -14,7 +16,7 @@
             </div>
         </div>
     </div>
-    <div class="row col-12 mx-auto px-0">
+    <div class="row col-lg-12 mx-auto px-0">
         <h2 class="mt-4 mb-5 p-2 bg-dark rounded text-warning">Commentaires</h2>
         <div id="comment" class="row col-12">
             <?php foreach ($comments as $aComment): ?>

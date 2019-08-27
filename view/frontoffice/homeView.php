@@ -2,7 +2,7 @@
 
 
 <?php ob_start(); ?>
-<div class="row mx-auto px-auto">
+<div class="row my-auto mx-2 mx-lg-auto px-auto">
     <div class="row d-flex justify-content-between mt-2">
         <a href="index.php?action=list_articles&amp;parent=dad" class="font-weight-bolder mx-auto px-auto my-2 py-2 my-md-auto py-md-auto btn btn-outline-dark">Que vous soyez un papa ?</a>
         <div class="col-lg-6">

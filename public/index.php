@@ -85,8 +85,8 @@ try {
             }
         }
         elseif ($_GET['action'] == 'report') {
-            if (isset($_SESSION['user_id']) && isset($_GET['id']) && $_GET['id'] > 0) {
-                report($_GET['id'], $_SESSION['user_id']);
+            if (Session::getUserId() > 0 && Check::isIdSet()) {
+                report($_GET['id'], Session::getUserId());
             }
             else {
                 throw new Exception('Aucun identifiant de billet envoyé');
@@ -296,7 +296,7 @@ try {
         }
         elseif ($_GET['action'] == 'ignore') {
             if (Session::hasModerationAccess()) {
-                if (isset($_GET['id']) && $_GET['id'] > 0) {
+                if (Check::isIdSet()) {
                     ignoreComment($_GET['id']);
                 }
                 else {

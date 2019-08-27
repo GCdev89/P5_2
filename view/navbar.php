@@ -1,6 +1,6 @@
 <?php ob_start(); ?>
 <nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-dark pt-1 my-auto">
-    <a class="navbar-brand" href="index.php"><img id="nav_logo" src="../public/images/logo/x1.png" /></a>
+    <a class="navbar-brand" href="index.php"><img id="nav_logo" src="../public/images/logo/x1.png" alt="Code Bebe logo" /></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse my-auto" id="navbarMain">
         <ul class="navbar-nav mr-auto ml-3 my-auto">

@@ -2,7 +2,7 @@
 
 <?php ob_start(); ?>
 <div class="row col-lg-12 mx-auto px-0 py-auto">
-    <div id="registrationHelp" class="col-lg-4 mt-5 mx-auto mb-3 my-md-auto pb-3 px-auto bg-light rounded">
+    <div id="registrationHelp" class="col-lg-4 mt-5 mx-2 mx-lg-auto mb-3 my-md-auto pb-3 px-auto bg-light rounded">
         <p class="h5 mt-lg-2">Pour vous inscrire vous devez :</p>
         <ul class="list-group">
             <li id="registrationPseudo" class="list-group-item">Renseigner un Pseudo</li>

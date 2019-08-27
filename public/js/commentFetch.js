@@ -1,3 +1,7 @@
+/*
+* This script will manage comment posted, using fetch to send formdata to insert into db and display the comment.
+*/
+
 function commentManagement(element) {
     const formElt = element;
     formElt.addEventListener("submit", function(e){
@@ -25,7 +29,7 @@ function commentManagement(element) {
 
 function commentPrint(pseudo, content) {
     let commentToDisplay = `
-    <div class="col-md-11 mx-auto my-2">
+    <div id="scrollAnchor" class="col-md-11 mx-auto my-2">
         <div class="row d-flex justify-content-between bg-secondary text-light rounded-top">
             <p class="m-2"><span class="h4 font-italic">${pseudo}</span></p>
         </div>
@@ -34,8 +38,9 @@ function commentPrint(pseudo, content) {
         </div>
     </div>`;
 
-    window.scrollTo(0,900);
+    let commentAnchor = document.getElementById("scrollAnchor");
     document.getElementById("comment").insertAdjacentHTML("afterBegin", commentToDisplay);
+    document.getElementById("scrollAnchor").scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
 }
 
 if (document.getElementById("comment_form") != undefined) {
