@@ -74,7 +74,7 @@ class ArticleManager extends Manager
             else {
                 $where = 'WHERE';
             }
-            $where .= ' a.parent = :parent OR a.parent = "both" ';
+            $where .= ' (a.parent = :parent OR a.parent = "both") ';
         }
 
         // Filter by tag
@@ -124,17 +124,42 @@ class ArticleManager extends Manager
         return $affectedLines;
     }
 
-    public function count($userId)
+    public function count($userId, $parent, $tag)
     {
         $query = 'SELECT COUNT(id) FROM article';
         $where = '';
         if ($userId > 0) {
             $where = ' WHERE user_id = :user_id';
         }
+        if ($parent != NULL && $parent != 'both') {
+            if ($where != '') {
+                $where .= ' AND';
+            }
+            else {
+                $where = ' WHERE';
+            }
+            $where .= ' (parent = :parent OR parent = "both")';
+        }
+        if ($tag != NULL) {
+            if ($where != '') {
+                $where .= ' AND';
+            }
+            else {
+                $where .= ' WHERE';
+            }
+            $where .= ' tag = :tag';
+        }
         $query .= $where;
+
         $q= $this->db()->prepare($query);
         if ($userId > 0) {
             $q->bindValue(':user_id', $userId, $this->db()::PARAM_INT);
+        }
+        if ($parent != NULL && $parent != 'both') {
+            $q->bindValue(':parent', $parent, $this->db()::PARAM_STR);
+        }
+        if ($tag != NULL) {
+            $q->bindValue(':tag', $tag, $this->db()::PARAM_STR);
         }
         $q->execute();
         return $articleCount = $q->fetchColumn();

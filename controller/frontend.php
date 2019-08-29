@@ -22,20 +22,22 @@ function listContents($content, $parent, $tag)
     if ($content == 'article') {
         $contentManager = new Gaetan\P5_2\Model\ArticleManager();
         $contentsByPage = 6;
-        $view = '../view/frontoffice/listArticlesView.php';
         $action = 'list_articles';
         $isActive = $parent;
+        $pagin = '../view/paginationByType.php';
+        $view = '../view/frontoffice/listArticlesView.php';
         require('../view/frontoffice/sidebar.php');
     }
     elseif ($content == 'post') {
         $contentManager = new Gaetan\P5_2\Model\PostManager();
         $contentsByPage = 3;
-        $view = '../view/frontoffice/listPostsView.php';
         $action = 'list_posts';
         $isActive = 'blog';
+        $pagin= '../view/pagination.php';
+        $view = '../view/frontoffice/listPostsView.php';
     }
     $userId = 0;
-    $contentCount = $contentManager->count($userId);
+    $contentCount = $contentManager->count($userId, $parent, $tag);
     $countPages = ceil($contentCount / $contentsByPage);
     if (isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $countPages) {
         $currentPage = intval($_GET['page']);
@@ -43,10 +45,11 @@ function listContents($content, $parent, $tag)
     else {
         $currentPage = 1;
     }
+
     $start = ($currentPage - 1) * $contentsByPage;
     $whereUser = 0;
     $contents = $contentManager->getList($start, $contentsByPage, $whereUser, $parent, $tag);
-    require('../view/pagination.php');
+    require($pagin);
     require($view);
 }
 
@@ -178,7 +181,7 @@ function updateContent($type, $contentId)
 }
 
 // For editor and admin
-function updateListContents($type, $allContents, $tag)
+function updateListContents($type, $allContents, $parent, $tag)
 {
     // Test condition, either return all posts, or just those specific to one user
     if ($allContents == false) {
@@ -201,7 +204,7 @@ function updateListContents($type, $allContents, $tag)
         $contentManager = new Gaetan\P5_2\Model\PostManager();
         $contentsByPage = 10;
     }
-    $contentCount = $contentManager->count($userId, $type);
+    $contentCount = $contentManager->count($userId, $parent, $tag);
     $countPages = ceil($contentCount / $contentsByPage);
     if (isset($_GET['page']) && $_GET['page'] > 0 && $_GET['page'] <= $countPages) {
         $currentPage = intval($_GET['page']);

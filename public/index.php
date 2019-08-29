@@ -52,7 +52,7 @@ try {
                 throw new Exception('Tous les champs ne sont pas remplis.');
             }
         }
-        elseif ($_GET['action'] == 'comment_edit' && isset($_SESSION['user_id']))
+        elseif ($_GET['action'] == 'comment_edit')
         {
             if (Check::isIdSet())
             {
@@ -194,10 +194,11 @@ try {
         elseif ($_GET['action'] == 'update_list_my_contents') {
             if (Session::hasWriteAccess()) {
                 $type = Check::wichType();
+                $parent = Check::wichParent();
                 $tag = Check::wichTag();
                 $allContents = false;
                 if ($type == 'article') {
-                    updateListContents($type, $allContents, $tag);
+                    updateListContents($type, $allContents, $parent, $tag);
                 }
                 elseif ($type == 'post') {
                     if (Session::hasAdminAccess()) {
@@ -257,8 +258,9 @@ try {
         elseif ($_GET['action'] == 'update_list_contents') {
             if (Session::hasEditionAccess()) {
                 $allContents = true;
+                $parent = Check::wichParent();
                 $tag = Check::wichTag();
-                    updateListContents( $type = 'article', $allContents, $tag);
+                    updateListContents( $type = 'article', $allContents, $parent, $tag);
             }
             else {
                 throw new Exception('Vous n\'avez pas l\'autorisation requise');
